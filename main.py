@@ -7,8 +7,8 @@ import test
 import evaluation
 
 if __name__ == '__main__':
-	gen_stop.stop_words()
-	word_vec.train()
-	tr = train.train()
+	gen_stop.stop_words("training.data")
+	word_vec.train("training.data")
+	tr = train.train("training.data")
 	test.test("develop.data", tr)
 	evaluation.evaluate("develop.data", "score.txt", "output.txt")

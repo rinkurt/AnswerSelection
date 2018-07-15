@@ -7,8 +7,8 @@ import word_vec
 
 
 # 选取出现频率高的词作为停止词
-def stop_words():
-	sentences = word_vec.read_file("training.data")
+def stop_words(data):
+	sentences = word_vec.read_file(data)
 	f = open("stop_words.txt", "w", encoding="UTF-8")
 	c = Counter()
 	for s in sentences:
@@ -17,5 +17,5 @@ def stop_words():
 		print(x[0], file=f)
 
 if __name__ == '__main__':
-	stop_words()
+	stop_words("training.data")
 

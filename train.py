@@ -68,8 +68,8 @@ def loadData(filename):
 
 
 # 训练分类器
-def train():
-	trains, labels = loadData("training.data")
+def train(data):
+	trains, labels = loadData(data)
 	rf = GradientBoostingClassifier(n_estimators=35)
 	rf.fit(trains, labels)
 	joblib.dump(rf, "class.model")
@@ -77,6 +77,6 @@ def train():
 
 
 if __name__ == '__main__':
-	train()
+	train("training.data")
 
 

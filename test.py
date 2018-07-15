@@ -3,6 +3,7 @@
 # 测试
 
 import train
+import sys
 from sklearn.externals import joblib
 
 
@@ -16,4 +17,10 @@ def test(filename, model):
 
 
 if __name__ == '__main__':
-	test("develop.data", joblib.load("class.model"))
+	data = "develop.data"
+	model_file = "class.model"
+	if (len(sys.argv) >= 2):
+		data = sys.argv[1]
+	if (len(sys.argv) == 3):
+		model_file = sys.argv[2]
+	test(data, joblib.load(model_file))
