@@ -1,17 +1,53 @@
 # -*- coding:utf-8 -*-
 
-import gensim
-import doc2vec
+# 训练分类器
+
 import numpy as np
+import word_vec
+from gensim.models import Word2Vec
 from sklearn.externals import joblib
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 
+'''
+def load_dict(filename):
+	dict = defaultdict(list)
+	with open(filename, 'r', encoding='UTF-8') as wordvec:
+		for line in wordvec:
+			lst = line.split(" ")
+			vec = [float(x) for x in lst[1:-1]]
+			dict[lst[0]] = vec
+	return dict
+'''
+
+# 读取停止词
+def load_stop_words(filename):
+	lst = []
+	with open(filename, 'r', encoding='UTF-8') as file:
+		for line in file:
+			lst.append(line)
+	return lst
+
+
+# 词向量简单加和作为句子向量
+def sum_vector(model, words, stop_words):
+	dim = model.vector_size
+	vec = np.zeros(dim)
+	for w in words:
+		if w not in stop_words:
+			try:
+				v = model[w]
+				vec += np.array(v)
+			except:
+				pass
+
+	return vec
+
+
+# 文件读为句向量
 def loadData(filename):
-	qmodel = gensim.models.doc2vec.Doc2Vec.load("questions.doc2vec")
-	amodel = gensim.models.doc2vec.Doc2Vec.load("answers.doc2vec")
+	stop_words = load_stop_words("stop_words.txt")
+	model = Word2Vec.load("word_vec.model")
+
 	trains = []
 	labels = []
 
@@ -19,23 +55,28 @@ def loadData(filename):
 		for line in file.readlines():
 			line.rstrip("\n")
 			list = line.split("\t")
-			vquestions = qmodel.infer_vector(doc2vec.chinese_split(list[0]))
-			vanswers = amodel.infer_vector(doc2vec.chinese_split(list[1]))
-			vector = np.hstack((vquestions, vanswers))
+			question = word_vec.cn_split(list[0])
+			answer = word_vec.cn_split(list[1])
+			qvec = sum_vector(model, question, stop_words)
+			avec = sum_vector(model, answer, stop_words)
+			# 问句答句向量并列作为特征
+			vector = np.hstack((qvec, avec))
 			trains.append(vector)
 			labels.append(int(list[2]))
 
-	# print(trains, labels)
 	return trains, labels
 
+
+# 训练分类器
 def train():
 	trains, labels = loadData("training.data")
-	rf = LogisticRegression()
-	# rf = GradientBoostingClassifier(n_estimators=20)
-	# rf = RandomForestClassifier()
+	rf = GradientBoostingClassifier(n_estimators=35)
 	rf.fit(trains, labels)
-	joblib.dump(rf, "model.data")
+	joblib.dump(rf, "class.model")
 	return rf
+
 
 if __name__ == '__main__':
 	train()
+
+

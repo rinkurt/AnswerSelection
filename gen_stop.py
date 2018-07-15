@@ -1,16 +1,21 @@
 # -*- coding:utf-8 -*-
 
-from collections import Counter
-import word2vec
+# 生成停止词
 
-def stop_words(sentences):
+from collections import Counter
+import word_vec
+
+
+# 选取出现频率高的词作为停止词
+def stop_words():
+	sentences = word_vec.read_file("training.data")
 	f = open("stop_words.txt", "w", encoding="UTF-8")
 	c = Counter()
 	for s in sentences:
 		c.update(s)
-	for x in c.most_common(200):
+	for x in c.most_common(150):
 		print(x[0], file=f)
 
 if __name__ == '__main__':
-	stop_words(word2vec.read_file("training.data"))
+	stop_words()
 
