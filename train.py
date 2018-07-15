@@ -7,9 +7,11 @@ from sklearn.externals import joblib
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 
 def loadData(filename):
-	model = gensim.models.doc2vec.Doc2Vec.load("trained.doc2vec")
+	qmodel = gensim.models.doc2vec.Doc2Vec.load("questions.doc2vec")
+	amodel = gensim.models.doc2vec.Doc2Vec.load("answers.doc2vec")
 	trains = []
 	labels = []
 
@@ -17,9 +19,9 @@ def loadData(filename):
 		for line in file.readlines():
 			line.rstrip("\n")
 			list = line.split("\t")
-			question = model.infer_vector(doc2vec.chinese_split(list[0]))
-			answer = model.infer_vector(doc2vec.chinese_split(list[1]))
-			vector = np.array(question) - np.array(answer)
+			vquestions = qmodel.infer_vector(doc2vec.chinese_split(list[0]))
+			vanswers = amodel.infer_vector(doc2vec.chinese_split(list[1]))
+			vector = np.hstack((vquestions, vanswers))
 			trains.append(vector)
 			labels.append(int(list[2]))
 
@@ -28,7 +30,8 @@ def loadData(filename):
 
 def train():
 	trains, labels = loadData("training.data")
-	rf = GradientBoostingClassifier(n_estimators=40)
+	rf = LogisticRegression()
+	# rf = GradientBoostingClassifier(n_estimators=20)
 	# rf = RandomForestClassifier()
 	rf.fit(trains, labels)
 	joblib.dump(rf, "model.data")
