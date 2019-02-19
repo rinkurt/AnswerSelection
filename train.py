@@ -66,6 +66,24 @@ def loadData(filename):
 
 	return trains, labels
 
+def loadDataWOLabel(filename):
+	stop_words = load_stop_words("stop_words.txt")
+	model = Word2Vec.load("word_vec.model")
+
+	trains = []
+
+	with open(filename, 'r', encoding='UTF-8') as file:
+		for line in file.readlines():
+			line.rstrip("\n")
+			list = line.split("\t")
+			question = word_vec.cn_split(list[0])
+			answer = word_vec.cn_split(list[1])
+			qvec = sum_vector(model, question, stop_words)
+			avec = sum_vector(model, answer, stop_words)
+			# 问句答句向量并列作为特征
+			vector = np.hstack((qvec, avec))
+			trains.append(vector)
+	return trains
 
 # 训练分类器
 def train(data):
